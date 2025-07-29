@@ -1,0 +1,34 @@
+name: Deploy Flask App to EKS
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      run: |
+        git clone https://github.com/${{ github.repository }} .
+        ls
+
+    - name: Set up AWS CLI
+      run: |
+        mkdir ~/.aws
+        echo "[default]" > ~/.aws/config
+        echo "region = ap-south-1" >> ~/.aws/config
+
+    - name: Configure AWS Credentials
+      run: |
+        aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    - name: Update kubeconfig for EKS
+      run: |
+        aws eks update-kubeconfig --region ap-south-1 --name flask-cluster
+
+    - name: Deploy using Helm
+      run: |
+        helm upgrade --install flask-app ./flask-chart --set image.repository=ashu271999/flask-eks-app,image.tag=latest

@@ -1,0 +1,10 @@
+# flask-chart/values.yaml
+
+image:
+  repository: ashu271999/flask-eks-app
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: LoadBalancer
+  port: 80
