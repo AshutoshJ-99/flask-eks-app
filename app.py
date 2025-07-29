@@ -4,42 +4,52 @@ app = Flask(__name__)
 @app.route('/')
 def home():
     return '''
+    <!DOCTYPE html>
     <html>
     <head>
         <title>Beating Heart</title>
         <style>
             body {
-                text-align: center;
-                background-color: #fbeaff;
-                font-family: Arial, sans-serif;
-                padding-top: 100px;
+                background: linear-gradient(to right, #ffecd2 0%, #fcb69f 100%);
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                margin: 0;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             }
+
             .heart {
+                position: relative;
                 width: 100px;
                 height: 90px;
-                background: red;
-                position: relative;
-                margin: auto;
+                background: #ff4d6d;
                 transform: rotate(-45deg);
                 animation: beat 1s infinite;
+                box-shadow: 0 0 20px #ff4d6d;
             }
+
             .heart::before,
             .heart::after {
                 content: "";
+                position: absolute;
                 width: 100px;
                 height: 90px;
-                background: red;
+                background: #ff4d6d;
                 border-radius: 50%;
-                position: absolute;
             }
+
             .heart::before {
                 top: -50px;
                 left: 0;
             }
+
             .heart::after {
                 left: 50px;
                 top: 0;
             }
+
             @keyframes beat {
                 0%, 100% {
                     transform: scale(1) rotate(-45deg);
@@ -48,10 +58,12 @@ def home():
                     transform: scale(1.2) rotate(-45deg);
                 }
             }
+
             h1 {
                 margin-top: 50px;
-                font-size: 32px;
-                color: #333;
+                font-size: 2.5rem;
+                color: #fff;
+                text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
             }
         </style>
     </head>
