@@ -34,3 +34,6 @@ jobs:
           helm upgrade --install flask-app ./flask-chart \
             --set image.repository=${{ secrets.DOCKER_USERNAME }}/flask-eks-app \
             --set image.tag=latest
+
+      - name: Redeploy
+        run: kubectl rollout restart deployment flask-app
