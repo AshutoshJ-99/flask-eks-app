@@ -1,34 +1,36 @@
-name: Deploy Flask App to EKS
+name: Deploy to EKS
 
 on:
-  push:
-    branches: [ main ]
+  workflow_run:
+    workflows: ["Build and Push Docker Image"]
+    types:
+      - completed
 
 jobs:
   deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      run: |
-        git clone https://github.com/${{ github.repository }} .
-        ls
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up AWS CLI
-      run: |
-        mkdir ~/.aws
-        echo "[default]" > ~/.aws/config
-        echo "region = ap-south-1" >> ~/.aws/config
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
 
-    - name: Configure AWS Credentials
-      run: |
-        aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --region ap-south-1 --name <your-cluster-name>
 
-    - name: Update kubeconfig for EKS
-      run: |
-        aws eks update-kubeconfig --region ap-south-1 --name flask-cluster
+      - name: Install Helm
+        run: |
+          curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
-    - name: Deploy using Helm
-      run: |
-        helm upgrade --install flask-app ./flask-chart --set image.repository=ashu271999/flask-eks-app,image.tag=latest
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install flask-app ./flask-chart \
+            --set image.repository=${{ secrets.DOCKER_USERNAME }}/flask-eks-app \
+            --set image.tag=latest
